@@ -94,7 +94,7 @@ const AnimalTable = () => {
     };
 
     return (
-        <div className="bg-gray-900 text-white min-h-screen p-4 sm:p-6 lg:p-8 font-sans">
+        <div className="bg-gray-900 text-white p-4 sm:p-6 lg:p-8 font-sans">
             <div className="max-w-7xl mx-auto">
                 <h1 className="text-3xl sm:text-4xl font-bold mb-4 text-cyan-400">Animal Sightings Dashboard</h1>
                 <p className="mb-8 text-gray-400">Displaying the latest animal observation data.</p>
