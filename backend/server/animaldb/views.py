@@ -1,5 +1,6 @@
 from rest_framework import viewsets, status
 from django.db.models import Count, Max
+from datetime import timedelta 
 from django_filters.rest_framework import DjangoFilterBackend 
 from .models import Animal, Camera
 from .filters import CameraFilter
@@ -21,6 +22,42 @@ class AnimalViewSet(viewsets.ModelViewSet):
     permission_classes = [AllowAny]  #######
     filter_backends = [DjangoFilterBackend]
     filterset_class = AnimalFilter
+
+    def _calculate_event_count(self, queryset):
+        """
+        Helper method to calculate animal counts by grouping records into
+        sighting events to prevent overcounting. (Method 1)
+        """
+        records = queryset.order_by('timestamp')
+        if not records.exists():
+            return 0
+
+        TIME_WINDOW = timedelta(minutes=2)
+        sighting_events = []
+        processed_record_ids = set()
+
+        for record in records:
+            if record.id in processed_record_ids:
+                continue
+
+            current_event_records = [record]
+            processed_record_ids.add(record.id)
+            
+            # Find subsequent records from the same camera within the time window
+            for other_record in records:
+                if (other_record.id not in processed_record_ids and
+                    other_record.camera_id == record.camera_id and
+                    record.timestamp <= other_record.timestamp < record.timestamp + TIME_WINDOW):
+                    
+                    current_event_records.append(other_record)
+                    processed_record_ids.add(other_record.id)
+            
+            sighting_events.append(current_event_records)
+
+        # Sum the maximum 'count' from each identified event
+        total_count = sum(max(r.count for r in event) for event in sighting_events)
+        
+        return total_count
 
     @action(detail=False, methods=['get'])
     def species(self, request):
@@ -107,6 +144,8 @@ class AnimalViewSet(viewsets.ModelViewSet):
         top_locations_result = filtered_queryset.values('latitude', 'longitude') \
             .annotate(location_count=Count('id')) \
             .order_by('-location_count')[:3]
+        
+        # calculate average number of individuals in a year:
 
         # 5. Format the final response
         response_data = {
@@ -121,6 +160,110 @@ class AnimalViewSet(viewsets.ModelViewSet):
 
         return Response(response_data)
 
+    @action(detail=False, methods=['get'], url_path='monthly-summary')
+    def monthly_summary(self, request):
+        """
+        Calculates the total number of individuals of a given species seen per
+        month for a specific year. This uses event-based counting to avoid duplicates.
+        
+        Example: /api/animals/monthly-summary/?year=2025&species=Tiger
+        """
+        # 1. Get and validate 'year' and 'species' query parameters
+        year = request.query_params.get('year')
+        species = request.query_params.get('species')
+
+        if not year or not species:
+            return Response(
+                {'error': 'Both "year" and "species" query parameters are required.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        try:
+            year = int(year)
+        except ValueError:
+            return Response(
+                {'error': 'The "year" parameter must be a valid integer.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # 2. Get the base queryset for the entire year and species
+        base_queryset = Animal.objects.filter(
+            timestamp__year=year,
+            species__iexact=species
+        )
+
+        # 3. Iterate through each month and calculate the count
+        monthly_counts = {}
+        for month_num in range(1, 13):
+            # Filter the base queryset for the current month
+            month_queryset = base_queryset.filter(timestamp__month=month_num)
+            
+            # Use the helper method to get the accurate count
+            count = self._calculate_event_count(month_queryset)
+            monthly_counts[month_num] = count
+
+        # 4. Format the response to use month names as keys
+        month_map = {
+            1: 'jan', 2: 'feb', 3: 'mar', 4: 'apr', 5: 'may', 6: 'jun',
+            7: 'jul', 8: 'aug', 9: 'sep', 10: 'oct', 11: 'nov', 12: 'dec'
+        }
+        
+        response_data = {month_map[month]: count for month, count in monthly_counts.items()}
+        
+        return Response(response_data)
+
+    #heaatmap data
+    
+    @action(detail=False, methods=['get'], url_path='heatmap-data')
+    def heatmap_data(self, request):
+        """
+        Provides data formatted for a heatmap, showing the total number of 
+        individuals counted at each unique coordinate pair for a given year.
+        
+        Example: /api/animals/heatmap-data/?year=2025&species=Tiger
+        """
+        # 1. Get and validate query parameters
+        year = request.query_params.get('year')
+        if not year:
+            return Response(
+                {'error': 'A "year" query parameter is required.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        try:
+            year = int(year)
+        except ValueError:
+            return Response(
+                {'error': 'The "year" parameter must be a valid integer.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+            
+        species = request.query_params.get('species')
+
+        # 2. Create the base queryset filtered by year and optionally species
+        base_queryset = Animal.objects.filter(timestamp__year=year)
+        if species:
+            base_queryset = base_queryset.filter(species__iexact=species)
+            
+        # 3. Get all unique latitude/longitude pairs from the filtered data
+        unique_locations = base_queryset.values('latitude', 'longitude').distinct()
+        
+        heatmap_data = []
+        # 4. For each unique location, calculate the accurate event-based count
+        for location in unique_locations:
+            lat = location['latitude']
+            lon = location['longitude']
+            
+            # Create a queryset for just this specific location
+            location_queryset = base_queryset.filter(latitude=lat, longitude=lon)
+            
+            # Reuse your accurate counting logic for this location's records
+            count_at_location = self._calculate_event_count(location_queryset)
+            
+            # Add the result to our list if any animals were counted
+            if count_at_location > 0:
+                # Convert Decimal to float for JSON compatibility
+                heatmap_data.append([float(lat), float(lon), count_at_location])
+                
+        return Response(heatmap_data)
 
 
 class CameraViewSet(viewsets.ModelViewSet):

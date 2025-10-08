@@ -1,10 +1,14 @@
 import React from 'react'
-import Sumarry from '../components/Sumarry'
+import Camera from '../components/Camera'
+import Ipadd from '../components/Ipadd'
+import Camview from '../components/Camview'
+import AnimalTable from '../components/AnimalTable'
 
 function page() {
   return (
-    <Sumarry/>
-    
+    <>
+    <AnimalTable/>
+    </>
   )
 }
 

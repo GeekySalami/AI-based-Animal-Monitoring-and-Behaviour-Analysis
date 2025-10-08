@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 
-// Main Heatmap component rewritten to use Leaflet directly, avoiding build-time import issues.
-const Heatmap = () => {
+// Add props to the component
+const Heatmap = ({ speciesFilter = null, yearFilter = null }) => {
     // State for all animal data fetched from the API
     const [allAnimals, setAllAnimals] = useState([]);
     // State to manage which species are visible on the map
@@ -63,12 +63,26 @@ const Heatmap = () => {
         };
     }, []);
 
-    // Effect to fetch animal data when the component mounts
+    // **UPDATED**: Effect to fetch animal data with filters when the component mounts or filters change
     useEffect(() => {
         const fetchAllAnimals = async () => {
             setLoading(true);
             setError(null);
-            const API_URL = `http://127.0.0.1:8000/animals/`;
+            
+            // Build URL with query parameters based on filters
+            let API_URL = `http://127.0.0.1:8000/animals/`;
+            const params = new URLSearchParams();
+            
+            if (speciesFilter) {
+                params.append('species', speciesFilter);
+            }
+            if (yearFilter) {
+                params.append('year', yearFilter);
+            }
+            
+            if (params.toString()) {
+                API_URL += `?${params.toString()}`;
+            }
 
             try {
                 const response = await fetch(API_URL);
@@ -91,7 +105,7 @@ const Heatmap = () => {
             }
         };
         fetchAllAnimals();
-    }, []);
+    }, [speciesFilter, yearFilter]); // Re-fetch when filters change
 
     // Effect to initialize the map once scripts are ready and the container is rendered
     useEffect(() => {
@@ -106,7 +120,7 @@ const Heatmap = () => {
     // Memoize the list of unique species to avoid recalculating on every render
     const uniqueSpeciesList = useMemo(() => Object.keys(speciesVisibility).sort(), [speciesVisibility]);
 
-    // **NEW**: Process data to group sightings and calculate density
+    // Process data to group sightings and calculate density
     const processedData = useMemo(() => {
         if (allAnimals.length === 0) {
             return { pointsWithCount: [], maxCount: 1 };
@@ -139,7 +153,7 @@ const Heatmap = () => {
     }, [allAnimals]);
 
 
-    // **UPDATED**: Filter the processed data and calculate intensity for the heatmap
+    // Filter the processed data and calculate intensity for the heatmap
     const heatmapPoints = useMemo(() => {
         const { pointsWithCount, maxCount } = processedData;
 
@@ -188,6 +202,12 @@ const Heatmap = () => {
             {/* Controls Sidebar */}
             <div className="w-full lg:w-1/4 xl:w-1/5 p-6 bg-gray-800 shadow-lg overflow-y-auto">
                 <h2 className="text-2xl font-bold mb-4 text-cyan-400">Species Filter</h2>
+                {speciesFilter && (
+                    <p className="mb-2 text-sm text-cyan-300">Filtered by: {speciesFilter}</p>
+                )}
+                {yearFilter && (
+                    <p className="mb-2 text-sm text-cyan-300">Year: {yearFilter}</p>
+                )}
                 <p className="mb-6 text-gray-400">Toggle visibility of species on the heatmap.</p>
                 <div className="space-y-3">
                     {uniqueSpeciesList.map(species => (
@@ -215,4 +235,3 @@ const Heatmap = () => {
 };
 
 export default Heatmap;
-

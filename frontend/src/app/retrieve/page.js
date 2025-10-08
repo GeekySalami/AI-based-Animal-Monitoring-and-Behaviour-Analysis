@@ -3,6 +3,7 @@ import AnimalTable from "../components/AnimalTable";
 import Heatmap from "../components/Heatmap";
 import Summary from "../components/Sumarry";
 import Camera from "../components/Camera";
+import Camview from "../components/Camview";
 
 function page() {
   return (
@@ -12,6 +13,7 @@ function page() {
         <Camera />
       </div>
       <Summary />
+      <Camview/>
     </>
   );
 }

@@ -1,5 +1,6 @@
 "use client";
 import React from 'react';
+import Ipadd from './Ipadd';
 
 function Camera() {
   // State to store the list of cameras fetched from the API
@@ -29,7 +30,7 @@ function Camera() {
       setIsLoading(true);
       setError(null);
       
-      const API_URL = 'http://localhost:8000/cameras/';
+      const API_URL = 'http://localhost:8000/det/cam/ip-addresses/';
 
       try {
         const response = await fetch(API_URL);
@@ -37,6 +38,7 @@ function Camera() {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
         const data = await response.json();
+        console.log(data)
         setCameras(data);
       } catch (e) {
         setError(`Failed to fetch data. Please check if your server is running. Error: ${e.message}`);
@@ -53,6 +55,7 @@ function Camera() {
     <div className="bg-gray-900 text-white p-4 sm:p-6 lg:p-8 font-sans">
       <div className="max-w-7xl mx-auto">
         <h1 className="text-3xl sm:text-4xl font-bold mb-4 text-cyan-400">Camera Dashboard</h1>
+            <Ipadd/>
         <p className="mb-8 text-gray-400">Displaying all registered camera locations.</p>
 
         {/* Data Table Section */}
@@ -62,6 +65,7 @@ function Camera() {
               <thead className="bg-gray-700">
                 <tr>
                   <th className="p-4 text-sm font-semibold text-gray-300 uppercase tracking-wider">ID</th>
+                  <th className="p-4 text-sm font-semibold text-gray-300 uppercase tracking-wider">IP Address</th>
                   <th className="p-4 text-sm font-semibold text-gray-300 uppercase tracking-wider">Location (Lat, Lng)</th>
                   <th className="p-4 text-sm font-semibold text-gray-300 uppercase tracking-wider">Time Added</th>
                 </tr>
@@ -74,9 +78,10 @@ function Camera() {
                 ) : cameras.length > 0 ? (
                   cameras.map(camera => (
                     <tr key={camera.id} className="hover:bg-gray-700 transition-colors duration-200">
-                      <td className="p-4 whitespace-nowrap">{camera.camera_id}</td>
+                      <td className="p-4 whitespace-nowrap">{camera.id}</td>
+                      <td className="p-4 whitespace-nowrap">{camera.ip}</td>
                       <td className="p-4 whitespace-nowrap">{`${camera.latitude}, ${camera.longitude}`}</td>
-                      <td className="p-4 whitespace-nowrap">{formatTimestamp(camera.addtime)}</td>
+                      <td className="p-4 whitespace-nowrap">{formatTimestamp(camera.timestamp)}</td>
                     </tr>
                   ))
                 ) : (
