@@ -16,10 +16,7 @@ import time
 # -------------------------------------------------------------------
 # Configuration
 # -------------------------------------------------------------------
-PT_WEIGHTS = (
-    "/home/peter/projects/MajorProject/Msjor_project_final/"
-    "AI-based-Animal-Monitoring-and-Behaviour-Analysis/videoScript/yolo_v26_best.pt"
-)
+PT_WEIGHTS = os.path.join(os.path.dirname(os.path.abspath(__file__)), "models", "yolo_v26_best.pt")
 IMG_SIZE = 640
 
 # -------------------------------------------------------------------

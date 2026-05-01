@@ -31,7 +31,7 @@ static/
 *.swo
 
 # YOLO / ML
-*.pt
+# *.pt (allowing model weights since they are under 100MB)
 *.onnx
 *.engine
 runs/

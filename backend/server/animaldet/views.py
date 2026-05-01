@@ -34,9 +34,10 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 # Settings
 # ---------------------------------------------------------------------------
-WEIGHTS_PT      = r"/home/peter/projects/MajorProject/Msjor_project_final/AI-based-Animal-Monitoring-and-Behaviour-Analysis/videoScript/yolo_v26_best.pt"
-WEIGHTS_ONNX    = r"/home/peter/projects/MajorProject/Msjor_project_final/AI-based-Animal-Monitoring-and-Behaviour-Analysis/videoScript/yolo_v26_best.onnx"
-WEIGHTS_OV      = r"/home/peter/projects/MajorProject/Msjor_project_final/AI-based-Animal-Monitoring-and-Behaviour-Analysis/videoScript/yolo_v26_best_openvino_model/"
+_models_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "models")
+WEIGHTS_PT      = os.path.join(_models_dir, "yolo_v26_best.pt")
+WEIGHTS_ONNX    = os.path.join(_models_dir, "yolo_v26_best.onnx")
+WEIGHTS_OV      = os.path.join(_models_dir, "yolo_v26_best_openvino_model")
 
 # Prefer OpenVINO (fastest on x86 CPU) > ONNX > PyTorch fallback
 if os.path.isdir(WEIGHTS_OV):
