@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Primary brand colors -->
+    <color name="green_primary">#FF1B5E20</color>
+    <color name="green_primary_dark">#FF0D3311</color>
+    <color name="green_accent">#FF4CAF50</color>
+    <color name="green_light">#FF81C784</color>
+
+    <!-- Status colors -->
+    <color name="status_live">#FF4CAF50</color>
+    <color name="status_idle">#FFFF9800</color>
+    <color name="status_error">#FFF44336</color>
+
+    <!-- Dark theme surfaces -->
+    <color name="surface_dark">#FF121212</color>
+    <color name="surface_card">#FF1E1E1E</color>
+    <color name="surface_elevated">#FF2C2C2C</color>
+
+    <!-- Text -->
+    <color name="text_primary">#FFFFFFFF</color>
+    <color name="text_secondary">#B3FFFFFF</color>
+    <color name="text_hint">#66FFFFFF</color>
+
+    <!-- Standard -->
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+</resources>

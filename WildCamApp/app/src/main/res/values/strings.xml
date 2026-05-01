@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">WildCam</string>
+    <string name="server_status_idle">Server Idle</string>
+    <string name="server_status_running">Server Running</string>
+    <string name="btn_start">Start Server</string>
+    <string name="btn_stop">Stop Server</string>
+    <string name="label_ip">Server Address</string>
+    <string name="label_gps">GPS Coordinates</string>
+    <string name="label_endpoints">Endpoints</string>
+    <string name="no_ip">No network connection</string>
+    <string name="no_gps">Acquiring GPS…</string>
+    <string name="endpoint_video">/video — MJPEG Stream</string>
+    <string name="endpoint_location">/location — GPS JSON</string>
+    <string name="permission_required">Camera and Location permissions are required</string>
+    <string name="camera_preview">Camera Preview</string>
+</resources>

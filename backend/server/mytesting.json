@@ -1,0 +1,22 @@
+[
+  {
+    "id": 1,
+    "species": "Zebra",
+    "count": 10,
+    "behaviour": "Grazing peacefully",
+    "latitude": "1.315000",
+    "longitude": "36.822500",
+    "camera_id": "CAM-05",
+    "timestamp": "2025-09-02T06:49:39.190842Z"
+  },
+  {
+    "id": 2,
+    "species": "Leopard",
+    "count": 1,
+    "behaviour": "Spotted resting on a tree branch",
+    "latitude": "1.300500",
+    "longitude": "36.819000",
+    "camera_id": "CAM-08",
+    "timestamp": "2025-09-02T06:45:00Z"
+  }
+]
